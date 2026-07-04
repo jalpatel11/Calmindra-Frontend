@@ -34,7 +34,7 @@ export async function POST(req: Request) {
       return new Response("Empty message", { status: 400 });
     }
 
-    const sessionId = req.headers.get("x-session-id") || 
+    const sessionId = body.id || req.headers.get("x-session-id") || 
                      `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     try {
