@@ -63,7 +63,8 @@ export async function POST(req: Request) {
             const words = botMessage.split(' ');
             for (let i = 0; i < words.length; i++) {
               const word = i === 0 ? words[i] : ' ' + words[i];
-              const chunk = `0:"${word.replace(/"/g, '\\"').replace(/\n/g, '\\n')}"\n`;
+              const chunk = `0:${JSON.stringify(word)}\n`;
+              console.log("Streaming chunk:", chunk.trim());
               controller.enqueue(encoder.encode(chunk));
               // Small delay to simulate typing/streaming effect
               await new Promise((resolve) => setTimeout(resolve, 30));
@@ -76,6 +77,7 @@ export async function POST(req: Request) {
                 completionTokens: words.length
               }
             })}\n`;
+            console.log("Streaming finish chunk:", finishChunk.trim());
             controller.enqueue(encoder.encode(finishChunk));
             
             controller.close();
@@ -106,7 +108,8 @@ export async function POST(req: Request) {
             const words = fallbackText.split(' ');
             for (let i = 0; i < words.length; i++) {
               const word = i === 0 ? words[i] : ' ' + words[i];
-              const chunk = `0:"${word.replace(/"/g, '\\"').replace(/\n/g, '\\n')}"\n`;
+              const chunk = `0:${JSON.stringify(word)}\n`;
+              console.log("Streaming fallback chunk:", chunk.trim());
               controller.enqueue(encoder.encode(chunk));
               // Small delay to simulate typing/streaming effect
               await new Promise((resolve) => setTimeout(resolve, 30));
@@ -119,6 +122,7 @@ export async function POST(req: Request) {
                 completionTokens: words.length
               }
             })}\n`;
+            console.log("Streaming fallback finish chunk:", finishChunk.trim());
             controller.enqueue(encoder.encode(finishChunk));
             
             controller.close();
