@@ -1,6 +1,6 @@
 import {
-  unstable_useRemoteThreadListRuntime as useRemoteThreadListRuntime,
-  type unstable_RemoteThreadListAdapter as RemoteThreadListAdapter,
+  useRemoteThreadListRuntime,
+  type RemoteThreadListAdapter,
   type ThreadHistoryAdapter,
 } from "@assistant-ui/react";
 import { useChatRuntime } from "@assistant-ui/react-ai-sdk";
@@ -33,7 +33,7 @@ export const myThreadListAdapter: RemoteThreadListAdapter = {
     }
   },
   
-  async initialize(threadId) {
+  async initialize(threadId?: string) {
     try {
       const remoteUUID = generateUUID();
       const res = await fetch("/api/threads", {
@@ -53,7 +53,7 @@ export const myThreadListAdapter: RemoteThreadListAdapter = {
     }
   },
   
-  async delete(remoteId) {
+  async delete(remoteId: string) {
     try {
       const res = await fetch(`/api/threads/${remoteId}`, {
         method: "DELETE",
@@ -65,21 +65,21 @@ export const myThreadListAdapter: RemoteThreadListAdapter = {
     }
   },
   
-  async rename(remoteId, newTitle) {
+  async rename(remoteId: string, newTitle: string) {
     console.log(`Renaming thread ${remoteId} to ${newTitle}`);
   },
   
-  async archive(remoteId) {
+  async archive(remoteId: string) {
     console.log(`Archiving thread ${remoteId}`);
   },
   
-  async unarchive(remoteId) {
+  async unarchive(remoteId: string) {
     console.log(`Unarchiving thread ${remoteId}`);
   },
   
-  async generateTitle(remoteId, unstable_messages) {
+  async generateTitle(remoteId: string, unstable_messages: readonly any[]) {
     return createAssistantStream(async (controller) => {
-      const firstUserMsg = unstable_messages.find((m) => m.role === "user");
+      const firstUserMsg = unstable_messages.find((m: any) => m.role === "user");
       let title = "Chat Session";
       if (firstUserMsg && Array.isArray(firstUserMsg.content)) {
         const textContent = firstUserMsg.content.find((item: any) => item.type === "text")?.text;
@@ -90,6 +90,24 @@ export const myThreadListAdapter: RemoteThreadListAdapter = {
       }
       controller.appendText(title);
     });
+  },
+
+  async fetch(threadId: string) {
+    try {
+      const res = await fetch("/api/threads", { cache: "no-store" });
+      if (!res.ok) throw new Error("Failed to fetch threads");
+      const threads = await res.json();
+      const thread = threads.find((t: any) => t.id === threadId);
+      if (!thread) throw new Error(`Thread ${threadId} not found`);
+      return {
+        remoteId: thread.id,
+        title: thread.title,
+        status: "regular" as const,
+      };
+    } catch (error) {
+      console.error(`Error fetching remote thread ${threadId}:`, error);
+      throw error;
+    }
   },
 };
 
@@ -119,4 +137,46 @@ export const makeHistoryAdapter = (threadId: string): ThreadHistoryAdapter => ({
   async append() {
     // No-op: Saved on the backend during chat completions loop
   },
+
+  withFormat(formatAdapter) {
+    return {
+      async load() {
+        try {
+          const res = await fetch(`/api/threads/${threadId}/messages`, {
+            cache: "no-store",
+          });
+          if (!res.ok) throw new Error("Failed to load thread messages");
+          const messages = await res.json();
+          
+          return {
+            messages: messages.map((m: any) => {
+              const uiMessage = {
+                id: m.id || generateUUID(),
+                role: m.role,
+                parts: [
+                  {
+                    type: "text",
+                    text: m.content
+                  }
+                ]
+              };
+              
+              return formatAdapter.decode({
+                id: uiMessage.id,
+                parent_id: null,
+                format: formatAdapter.format,
+                content: uiMessage as any
+              });
+            })
+          };
+        } catch (error) {
+          console.error(`Error loading formatted messages for thread ${threadId}:`, error);
+          return { messages: [] };
+        }
+      },
+      async append(item) {
+        // No-op: Saved on the backend during chat completions loop
+      }
+    };
+  }
 });

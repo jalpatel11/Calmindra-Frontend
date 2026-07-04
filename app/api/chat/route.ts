@@ -5,9 +5,11 @@ const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8000";
 
 export async function POST(req: Request) {
   try {
-    const { messages } = await req.json();
+    const body = await req.json();
+    console.log("POST /api/chat request body:", JSON.stringify(body, null, 2));
+    const { messages } = body;
     
-    const lastMessage = messages[messages.length - 1];
+    const lastMessage = messages?.[messages.length - 1];
     if (!lastMessage || lastMessage.role !== "user") {
       return new Response("No user message found", { status: 400 });
     }
@@ -21,6 +23,9 @@ export async function POST(req: Request) {
       messageText = textContent?.text || "";
     } else if (lastMessage.content?.text) {
       messageText = lastMessage.content.text;
+    } else if (Array.isArray(lastMessage.parts)) {
+      const textContent = lastMessage.parts.find((item: { type: string; text?: string }) => item.type === "text");
+      messageText = textContent?.text || "";
     }
 
     if (!messageText.trim()) {
@@ -53,16 +58,18 @@ export async function POST(req: Request) {
       // Stream response word by word for AI SDK compatibility
       const encoder = new TextEncoder();
       const stream = new ReadableStream({
-        start(controller) {
+        async start(controller) {
           try {
             const words = botMessage.split(' ');
             for (let i = 0; i < words.length; i++) {
               const word = i === 0 ? words[i] : ' ' + words[i];
               const chunk = `0:"${word.replace(/"/g, '\\"').replace(/\n/g, '\\n')}"\n`;
               controller.enqueue(encoder.encode(chunk));
+              // Small delay to simulate typing/streaming effect
+              await new Promise((resolve) => setTimeout(resolve, 30));
             }
             
-            const finishChunk = `d:${JSON.stringify({
+            const finishChunk = `e:${JSON.stringify({
               finishReason: "stop",
               usage: {
                 promptTokens: messageText.split(' ').length,
@@ -83,6 +90,7 @@ export async function POST(req: Request) {
         headers: {
           "Content-Type": "text/plain; charset=utf-8",
           "X-Session-ID": sessionId,
+          "x-vercel-ai-data-stream": "v1",
         },
       });
 
@@ -93,16 +101,18 @@ export async function POST(req: Request) {
       
       const encoder = new TextEncoder();
       const stream = new ReadableStream({
-        start(controller) {
+        async start(controller) {
           try {
             const words = fallbackText.split(' ');
             for (let i = 0; i < words.length; i++) {
               const word = i === 0 ? words[i] : ' ' + words[i];
               const chunk = `0:"${word.replace(/"/g, '\\"').replace(/\n/g, '\\n')}"\n`;
               controller.enqueue(encoder.encode(chunk));
+              // Small delay to simulate typing/streaming effect
+              await new Promise((resolve) => setTimeout(resolve, 30));
             }
             
-            const finishChunk = `d:${JSON.stringify({
+            const finishChunk = `e:${JSON.stringify({
               finishReason: "stop",
               usage: {
                 promptTokens: messageText.split(' ').length,
@@ -122,6 +132,7 @@ export async function POST(req: Request) {
       return new Response(stream, {
         headers: {
           "Content-Type": "text/plain; charset=utf-8",
+          "x-vercel-ai-data-stream": "v1",
         },
       });
     }

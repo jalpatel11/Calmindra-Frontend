@@ -2,10 +2,10 @@
 
 import { 
   AssistantRuntimeProvider, 
-  unstable_useRemoteThreadListRuntime as useRemoteThreadListRuntime,
+  useRemoteThreadListRuntime,
   useThreadListItem,
 } from "@assistant-ui/react";
-import { useChatRuntime } from "@assistant-ui/react-ai-sdk";
+import { useChatRuntime, AssistantChatTransport } from "@assistant-ui/react-ai-sdk";
 import { Thread } from "@/components/assistant-ui/thread";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
@@ -24,19 +24,26 @@ export const Assistant = () => {
       
       // eslint-disable-next-line react-hooks/rules-of-hooks
       return useChatRuntime({
-        api: "/api/chat",
-        headers: {
-          "x-session-id": threadId,
-        },
+        transport: new AssistantChatTransport({
+          api: "/api/chat",
+          headers: {
+            "x-session-id": threadId,
+          },
+        }),
         adapters: {
           history: makeHistoryAdapter(threadId),
         },
-        initialMessages: [
+        messages: [
           {
             id: "welcome-msg",
             role: "assistant",
-            content: "Hello! I'm **Calmindra**, your compassionate mental health companion. 🌸\n\nI'm here to provide a safe, non-judgmental space where you can:\n\n- 💙 Share your thoughts and feelings\n- 🌿 Explore coping strategies  \n- 💜 Find emotional support\n- 🧘‍♀️ Practice mindfulness techniques\n- 🌟 Work through daily challenges\n\nTake a deep breath, and know that whatever you're going through, you don't have to face it alone. \n\n**How are you feeling today?** Feel free to share as much or as little as you'd like - I'm here to listen. 💕",
-            createdAt: new Date(),
+            parts: [
+              {
+                type: "text",
+                text: "Hello! I'm **Calmindra**, your compassionate mental health companion. 🌸\n\nI'm here to provide a safe, non-judgmental space where you can:\n\n- 💙 Share your thoughts and feelings\n- 🌿 Explore coping strategies  \n- 💜 Find emotional support\n- 🧘‍♀️ Practice mindfulness techniques\n- 🌟 Work through daily challenges\n\nTake a deep breath, and know that whatever you're going through, you don't have to face it alone. \n\n**How are you feeling today?** Feel free to share as much or as little as you'd like - I'm here to listen. 💕",
+                state: "done"
+              }
+            ],
           },
         ],
       });

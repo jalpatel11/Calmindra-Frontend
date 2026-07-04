@@ -1,13 +1,13 @@
-import { ToolCallContentPartComponent } from "@assistant-ui/react";
+import { ToolCallMessagePartProps } from "@assistant-ui/react";
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 import { useState } from "react";
 import { Button } from "../ui/button";
 
-export const ToolFallback: ToolCallContentPartComponent = ({
+export const ToolFallback = ({
   toolName,
   argsText,
   result,
-}) => {
+}: ToolCallMessagePartProps) => {
   const [isCollapsed, setIsCollapsed] = useState(true);
   return (
     <div className="mb-4 flex w-full flex-col gap-3 rounded-lg border py-3">
