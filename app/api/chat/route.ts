@@ -1,7 +1,7 @@
 export const runtime = "edge";
 export const maxDuration = 30;
 
-import { createDataStreamResponse } from "ai";
+import { createTextStreamResponse } from "ai";
 
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8000";
 
@@ -57,30 +57,35 @@ export async function POST(req: Request) {
       const data = await backendResponse.json();
       const botMessage = data.bot_message || "";
 
-      // Stream response word by word using Vercel AI SDK's official createDataStreamResponse
-      return createDataStreamResponse({
-        execute: async (dataStream) => {
+      // Stream response word by word using Vercel AI SDK's official createTextStreamResponse
+      const stream = new ReadableStream({
+        async start(controller) {
           try {
             const words = botMessage.split(' ');
             for (let i = 0; i < words.length; i++) {
               const word = i === 0 ? words[i] : ' ' + words[i];
-              dataStream.write(`0:${JSON.stringify(word)}\n`);
+              controller.enqueue(`0:${JSON.stringify(word)}\n`);
               // Small delay to simulate typing/streaming effect
               await new Promise((resolve) => setTimeout(resolve, 30));
             }
             
-            dataStream.write(`e:${JSON.stringify({
+            controller.enqueue(`e:${JSON.stringify({
               finishReason: "stop",
               usage: {
                 promptTokens: messageText.split(' ').length,
                 completionTokens: words.length
               }
             })}\n`);
+            controller.close();
           } catch (error) {
             console.error("Streaming error:", error);
-            throw error;
+            controller.error(error);
           }
-        },
+        }
+      });
+
+      return createTextStreamResponse({
+        stream,
         headers: {
           "X-Session-ID": sessionId,
         }
@@ -91,31 +96,34 @@ export async function POST(req: Request) {
       
       const fallbackText = "I apologize, but I'm having trouble connecting right now. Please try again.";
       
-      // Stream fallback response word by word using Vercel AI SDK's official createDataStreamResponse
-      return createDataStreamResponse({
-        execute: async (dataStream) => {
+      // Stream fallback response word by word using Vercel AI SDK's official createTextStreamResponse
+      const stream = new ReadableStream({
+        async start(controller) {
           try {
             const words = fallbackText.split(' ');
             for (let i = 0; i < words.length; i++) {
               const word = i === 0 ? words[i] : ' ' + words[i];
-              dataStream.write(`0:${JSON.stringify(word)}\n`);
+              controller.enqueue(`0:${JSON.stringify(word)}\n`);
               // Small delay to simulate typing/streaming effect
               await new Promise((resolve) => setTimeout(resolve, 30));
             }
             
-            dataStream.write(`e:${JSON.stringify({
+            controller.enqueue(`e:${JSON.stringify({
               finishReason: "stop",
               usage: {
                 promptTokens: messageText.split(' ').length,
                 completionTokens: words.length
               }
             })}\n`);
+            controller.close();
           } catch (error) {
             console.error("Fallback streaming error:", error);
-            throw error;
+            controller.error(error);
           }
         }
       });
+
+      return createTextStreamResponse({ stream });
     }
 
   } catch (error) {
