@@ -29,8 +29,12 @@ export async function getAuthenticatedProxySession(): Promise<ProxySession | nul
     return null;
   }
 
+  const userId = USER_ID_PATTERN.test(userKey)
+    ? userKey
+    : await createBackendUserId(userKey);
+
   return {
-    userId: await createBackendUserId(userKey),
+    userId,
   };
 }
 

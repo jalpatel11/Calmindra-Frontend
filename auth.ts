@@ -12,9 +12,7 @@ export const enabledAuthProviders = [
   process.env.AUTH_GITHUB_ID && process.env.AUTH_GITHUB_SECRET
     ? { id: "github", name: "GitHub" }
     : null,
-  process.env.AUTH_DEV_PASSWORD && process.env.NODE_ENV !== "production"
-    ? { id: "dev-login", name: "Development login" }
-    : null,
+  { id: "credentials", name: "Email and Password" },
 ].filter((provider): provider is { id: string; name: string } => Boolean(provider));
 
 const authConfig: NextAuthConfig = {
@@ -33,36 +31,55 @@ const authConfig: NextAuthConfig = {
   providers: [
     ...(process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET ? [Google] : []),
     ...(process.env.AUTH_GITHUB_ID && process.env.AUTH_GITHUB_SECRET ? [GitHub] : []),
-    ...(process.env.AUTH_DEV_PASSWORD && process.env.NODE_ENV !== "production"
-      ? [
-          Credentials({
-            id: "dev-login",
-            name: "Development login",
-            credentials: {
-              email: { label: "Email", type: "email" },
-              password: { label: "Password", type: "password" },
-            },
-            async authorize(credentials) {
-              const email =
-                typeof credentials?.email === "string"
-                  ? credentials.email.trim().toLowerCase()
-                  : "";
-              const password =
-                typeof credentials?.password === "string" ? credentials.password : "";
+    Credentials({
+      id: "credentials",
+      name: "Email and Password",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        const email =
+          typeof credentials?.email === "string"
+            ? credentials.email.trim().toLowerCase()
+            : "";
+        const password =
+          typeof credentials?.password === "string" ? credentials.password : "";
 
-              if (!email || password !== process.env.AUTH_DEV_PASSWORD) {
-                return null;
-              }
+        if (!email || !password) {
+          return null;
+        }
 
-              return {
-                id: `dev:${email}`,
-                email,
-                name: email.split("@")[0] || "Calmindra user",
-              };
+        try {
+          const backendUrl = process.env.BACKEND_URL || "http://localhost:8000";
+          const res = await fetch(`${backendUrl}/auth/login`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-Backend-Secret":
+                process.env.BACKEND_API_SECRET ||
+                "calmindra-local-development-secret-change-before-production",
             },
-          }),
-        ]
-      : []),
+            body: JSON.stringify({ email, password }),
+            cache: "no-store",
+          });
+
+          if (!res.ok) {
+            return null;
+          }
+
+          const data = await res.json();
+          return {
+            id: data.id,
+            email,
+            name: email.split("@")[0] || "Calmindra user",
+          };
+        } catch (error) {
+          console.error("Credentials authorize failed:", error);
+          return null;
+        }
+      },
+    }),
   ],
   callbacks: {
     authorized({ request, auth }) {

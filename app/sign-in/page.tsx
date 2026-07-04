@@ -22,12 +22,21 @@ export default async function SignInPage({
   const params = await searchParams;
   const isSignup = params.mode === "signup";
   const oauthProviders = enabledAuthProviders.filter(
-    (provider) => provider.id !== "dev-login",
+    (provider) => provider.id !== "credentials",
   );
-  const hasDevLogin = enabledAuthProviders.some((provider) => provider.id === "dev-login");
+  const hasCredentials = enabledAuthProviders.some((provider) => provider.id === "credentials");
 
   if (session?.user) {
     redirect("/");
+  }
+
+  let errorMessage = "";
+  if (params.error) {
+    if (params.error === "CredentialsSignin") {
+      errorMessage = "Invalid email or password.";
+    } else {
+      errorMessage = params.error;
+    }
   }
 
   return (
@@ -112,14 +121,14 @@ export default async function SignInPage({
                 </h2>
                 <p className="mt-3 text-sm leading-6 text-slate-600">
                   {isSignup
-                    ? "Use a trusted provider to create your private Calmindra space."
-                    : "Continue with the same provider you used before."}
+                    ? "Use your email and password to create your private Calmindra space."
+                    : "Enter your email and password to sign in."}
                 </p>
               </div>
 
-              {params.error ? (
+              {errorMessage ? (
                 <div className="mb-5 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
-                  Authentication failed. Please try another provider or start again.
+                  {errorMessage}
                 </div>
               ) : null}
 
@@ -143,8 +152,8 @@ export default async function SignInPage({
                 ))}
               </div>
 
-              {hasDevLogin ? (
-                <form action={signInWithDevCredentials} className="mt-6 space-y-3">
+              {hasCredentials ? (
+                <form action={isSignup ? handleSignUp : handleSignIn} className="mt-6 space-y-3">
                   <div className="grid gap-2">
                     <label className="text-sm font-medium text-slate-700" htmlFor="email">
                       Email
@@ -177,7 +186,7 @@ export default async function SignInPage({
                     type="submit"
                     className="h-11 w-full rounded-lg bg-emerald-700 text-white hover:bg-emerald-800"
                   >
-                    {isSignup ? "Create local account" : "Continue"}
+                    {isSignup ? "Create account" : "Sign in"}
                   </Button>
                 </form>
               ) : null}
@@ -208,12 +217,64 @@ async function signInWithProvider(formData: FormData) {
   await signIn(provider, { redirectTo: "/" });
 }
 
-async function signInWithDevCredentials(formData: FormData) {
+async function handleSignIn(formData: FormData) {
   "use server";
 
-  await signIn("dev-login", {
-    email: String(formData.get("email") || ""),
-    password: String(formData.get("password") || ""),
-    redirectTo: "/",
-  });
+  const email = String(formData.get("email") || "");
+  const password = String(formData.get("password") || "");
+
+  try {
+    await signIn("credentials", {
+      email,
+      password,
+      redirectTo: "/",
+    });
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) {
+      throw error;
+    }
+    console.error("SignIn failed:", error);
+    redirect("/sign-in?error=CredentialsSignin");
+  }
+}
+
+async function handleSignUp(formData: FormData) {
+  "use server";
+
+  const email = String(formData.get("email") || "");
+  const password = String(formData.get("password") || "");
+
+  try {
+    const backendUrl = process.env.BACKEND_URL || "http://localhost:8000";
+    const res = await fetch(`${backendUrl}/auth/signup`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Backend-Secret":
+          process.env.BACKEND_API_SECRET ||
+          "calmindra-local-development-secret-change-before-production",
+      },
+      body: JSON.stringify({ email, password }),
+      cache: "no-store",
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      const detail = data?.detail || "Registration failed.";
+      redirect(`/sign-in?mode=signup&error=${encodeURIComponent(detail)}`);
+    }
+
+    // Automatically sign in the user upon successful registration
+    await signIn("credentials", {
+      email,
+      password,
+      redirectTo: "/",
+    });
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) {
+      throw error;
+    }
+    console.error("SignUp failed:", error);
+    redirect("/sign-in?mode=signup&error=Failed to register. Please try again.");
+  }
 }
