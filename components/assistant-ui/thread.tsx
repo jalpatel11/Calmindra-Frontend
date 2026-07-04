@@ -16,6 +16,9 @@ import {
   RefreshCwIcon,
   SendHorizontalIcon,
   Brain,
+  HeartPulse,
+  Leaf,
+  ListChecks,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -27,12 +30,12 @@ import { ToolFallback } from "./tool-fallback";
 export const Thread: FC = () => {
   return (
     <ThreadPrimitive.Root
-      className="bg-background box-border flex h-full flex-col overflow-hidden"
+      className="box-border flex h-full flex-col overflow-hidden bg-[#f7faf8]"
       style={{
         ["--thread-max-width" as string]: "42rem",
       }}
     >
-      <ThreadPrimitive.Viewport className="flex h-full flex-col items-center overflow-y-scroll scroll-smooth bg-inherit px-4 pt-8">
+      <ThreadPrimitive.Viewport className="flex h-full flex-col items-center overflow-y-scroll scroll-smooth bg-[linear-gradient(180deg,#f7faf8_0%,#ffffff_42%,#f7faf8_100%)] px-4 pt-8">
         <ThreadWelcome />
 
         <ThreadPrimitive.Messages
@@ -47,7 +50,7 @@ export const Thread: FC = () => {
           <div className="min-h-8 flex-grow" />
         </ThreadPrimitive.If>
 
-        <div className="sticky bottom-0 mt-3 flex w-full max-w-[var(--thread-max-width)] flex-col items-center justify-end rounded-t-lg bg-inherit pb-4">
+        <div className="sticky bottom-0 mt-3 flex w-full max-w-[var(--thread-max-width)] flex-col items-center justify-end bg-gradient-to-t from-[#f7faf8] via-[#f7faf8] to-transparent pb-4 pt-6">
           <ThreadScrollToBottom />
           <Composer />
         </div>
@@ -75,19 +78,17 @@ const ThreadWelcome: FC = () => {
     <ThreadPrimitive.Empty>
       <div className="flex w-full max-w-[var(--thread-max-width)] flex-grow flex-col">
         <div className="flex w-full flex-grow flex-col items-center justify-center">
-          <div className="text-center mb-8">
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <div className="flex items-center gap-2">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white">
-                  <Brain className="size-6" />
-                </div>
+          <div className="mb-8 text-center">
+            <div className="mb-5 flex items-center justify-center">
+              <div className="flex size-14 items-center justify-center rounded-2xl bg-emerald-700 text-white shadow-sm">
+                <Brain className="size-7" />
               </div>
             </div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
-              Welcome to Calmindra
+            <h1 className="mb-3 text-2xl font-semibold text-slate-950">
+              What would help right now?
             </h1>
-            <p className="text-muted-foreground max-w-md">
-              Your clinical-grade AI wellbeing companion. Calmindra provides a secure, private space to discuss daily challenges, explore coping strategies, and practice relaxation.
+            <p className="max-w-md text-sm leading-6 text-slate-600">
+              Share what is happening, slow down a racing thought, or take one small next step.
             </p>
           </div>
         </div>
@@ -99,35 +100,38 @@ const ThreadWelcome: FC = () => {
 
 const ThreadWelcomeSuggestions: FC = () => {
   return (
-    <div className="mt-6 flex w-full items-stretch justify-center gap-4 flex-wrap">
+    <div className="mt-6 grid w-full gap-3 sm:grid-cols-3">
       <ThreadPrimitive.Suggestion
-        className="hover:bg-blue-50/80 flex max-w-sm grow basis-0 flex-col items-center justify-center rounded-lg border border-blue-200 p-4 transition-colors ease-in bg-gradient-to-br from-blue-50/50 to-purple-50/50"
-        prompt="I am experiencing anxiety today and would appreciate support."
+        className="flex min-h-28 flex-col justify-between rounded-lg border border-emerald-900/10 bg-white p-4 text-left shadow-sm transition-colors ease-in hover:border-emerald-700/30 hover:bg-emerald-50/70"
+        prompt="I am feeling overwhelmed. Can you help me ground myself?"
         method="replace"
         autoSend
       >
-        <span className="line-clamp-2 text-ellipsis text-sm font-semibold text-center text-blue-800">
-          Manage Anxiety
+        <Leaf className="size-5 text-emerald-700" />
+        <span className="line-clamp-2 text-ellipsis text-sm font-semibold text-slate-900">
+          Ground me
         </span>
       </ThreadPrimitive.Suggestion>
       <ThreadPrimitive.Suggestion
-        className="hover:bg-purple-50/80 flex max-w-sm grow basis-0 flex-col items-center justify-center rounded-lg border border-purple-200 p-4 transition-colors ease-in bg-gradient-to-br from-purple-50/50 to-pink-50/50"
-        prompt="Could you guide me through breathing exercises or relaxation techniques?"
+        className="flex min-h-28 flex-col justify-between rounded-lg border border-rose-900/10 bg-white p-4 text-left shadow-sm transition-colors ease-in hover:border-rose-700/30 hover:bg-rose-50/70"
+        prompt="I have a worry stuck in my head. Can you help me sort through it?"
         method="replace"
         autoSend
       >
-        <span className="line-clamp-2 text-ellipsis text-sm font-semibold text-center text-purple-800">
-          Relaxation Techniques
+        <HeartPulse className="size-5 text-rose-700" />
+        <span className="line-clamp-2 text-ellipsis text-sm font-semibold text-slate-900">
+          Unpack a worry
         </span>
       </ThreadPrimitive.Suggestion>
       <ThreadPrimitive.Suggestion
-        className="hover:bg-green-50/80 flex max-w-sm grow basis-0 flex-col items-center justify-center rounded-lg border border-green-200 p-4 transition-colors ease-in bg-gradient-to-br from-green-50/50 to-blue-50/50"
-        prompt="I would like to speak about what has been on my mind recently."
+        className="flex min-h-28 flex-col justify-between rounded-lg border border-sky-900/10 bg-white p-4 text-left shadow-sm transition-colors ease-in hover:border-sky-700/30 hover:bg-sky-50/70"
+        prompt="Help me choose one small next step for today."
         method="replace"
         autoSend
       >
-        <span className="line-clamp-2 text-ellipsis text-sm font-semibold text-center text-green-800">
-          Open Discussion
+        <ListChecks className="size-5 text-sky-700" />
+        <span className="line-clamp-2 text-ellipsis text-sm font-semibold text-slate-900">
+          One next step
         </span>
       </ThreadPrimitive.Suggestion>
     </div>
@@ -136,12 +140,12 @@ const ThreadWelcomeSuggestions: FC = () => {
 
 const Composer: FC = () => {
   return (
-    <ComposerPrimitive.Root className="focus-within:border-ring/20 flex w-full flex-wrap items-end rounded-lg border bg-inherit px-2.5 shadow-sm transition-colors ease-in">
+    <ComposerPrimitive.Root className="flex w-full flex-wrap items-end rounded-2xl border border-emerald-950/10 bg-white px-2.5 shadow-[0_16px_45px_rgba(15,23,42,0.10)] transition-colors ease-in focus-within:border-emerald-700/40">
       <ComposerPrimitive.Input
         rows={1}
         autoFocus
         placeholder="Type a message or share what is on your mind..."
-        className="placeholder:text-muted-foreground max-h-40 flex-grow resize-none border-none bg-transparent px-2 py-4 text-sm outline-none focus:ring-0 disabled:cursor-not-allowed"
+        className="max-h-40 flex-grow resize-none border-none bg-transparent px-2 py-4 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:ring-0 disabled:cursor-not-allowed"
       />
       <ComposerAction />
     </ComposerPrimitive.Root>
@@ -156,7 +160,7 @@ const ComposerAction: FC = () => {
           <TooltipIconButton
             tooltip="Send"
             variant="default"
-            className="my-2.5 size-8 p-2 transition-opacity ease-in"
+            className="my-2.5 size-9 rounded-xl bg-emerald-700 p-2 text-white transition-opacity ease-in hover:bg-emerald-800"
           >
             <SendHorizontalIcon />
           </TooltipIconButton>
@@ -167,7 +171,7 @@ const ComposerAction: FC = () => {
           <TooltipIconButton
             tooltip="Cancel"
             variant="default"
-            className="my-2.5 size-8 p-2 transition-opacity ease-in"
+            className="my-2.5 size-9 rounded-xl bg-slate-900 p-2 text-white transition-opacity ease-in hover:bg-slate-800"
           >
             <CircleStopIcon />
           </TooltipIconButton>
@@ -182,7 +186,7 @@ const UserMessage: FC = () => {
     <MessagePrimitive.Root className="grid auto-rows-auto grid-cols-[minmax(72px,1fr)_auto] gap-y-2 [&:where(>*)]:col-start-2 w-full max-w-[var(--thread-max-width)] py-4">
       <UserActionBar />
 
-      <div className="bg-muted text-foreground max-w-[calc(var(--thread-max-width)*0.8)] break-words rounded-3xl px-5 py-2.5 col-start-2 row-start-2">
+      <div className="col-start-2 row-start-2 max-w-[calc(var(--thread-max-width)*0.8)] break-words rounded-2xl bg-emerald-700 px-5 py-3 text-sm leading-6 text-white shadow-sm">
         <MessagePrimitive.Content />
       </div>
 
@@ -199,7 +203,7 @@ const UserActionBar: FC = () => {
       className="flex flex-col items-end col-start-1 row-start-2 mr-3 mt-2.5"
     >
       <ActionBarPrimitive.Edit asChild>
-        <TooltipIconButton tooltip="Edit">
+        <TooltipIconButton tooltip="Edit" className="text-slate-500 hover:text-slate-900">
           <PencilIcon />
         </TooltipIconButton>
       </ActionBarPrimitive.Edit>
@@ -209,15 +213,15 @@ const UserActionBar: FC = () => {
 
 const EditComposer: FC = () => {
   return (
-    <ComposerPrimitive.Root className="bg-muted my-4 flex w-full max-w-[var(--thread-max-width)] flex-col gap-2 rounded-xl">
-      <ComposerPrimitive.Input className="text-foreground flex h-8 w-full resize-none bg-transparent p-4 pb-0 outline-none" />
+    <ComposerPrimitive.Root className="my-4 flex w-full max-w-[var(--thread-max-width)] flex-col gap-2 rounded-lg border border-emerald-950/10 bg-white shadow-sm">
+      <ComposerPrimitive.Input className="flex h-8 w-full resize-none bg-transparent p-4 pb-0 text-slate-900 outline-none" />
 
       <div className="mx-3 mb-3 flex items-center justify-center gap-2 self-end">
         <ComposerPrimitive.Cancel asChild>
-          <Button variant="ghost">Cancel</Button>
+          <Button variant="ghost" className="text-slate-600">Cancel</Button>
         </ComposerPrimitive.Cancel>
         <ComposerPrimitive.Send asChild>
-          <Button>Send</Button>
+          <Button className="bg-emerald-700 text-white hover:bg-emerald-800">Send</Button>
         </ComposerPrimitive.Send>
       </div>
     </ComposerPrimitive.Root>
@@ -226,8 +230,11 @@ const EditComposer: FC = () => {
 
 const AssistantMessage: FC = () => {
   return (
-    <MessagePrimitive.Root className="grid grid-cols-[auto_auto_1fr] grid-rows-[auto_1fr] relative w-full max-w-[var(--thread-max-width)] py-4">
-      <div className="text-foreground max-w-[calc(var(--thread-max-width)*0.8)] break-words leading-7 col-span-2 col-start-2 row-start-1 my-1.5">
+    <MessagePrimitive.Root className="relative grid w-full max-w-[var(--thread-max-width)] grid-cols-[auto_1fr_auto] grid-rows-[auto_1fr] gap-x-3 py-4">
+      <div className="col-start-1 row-start-1 mt-1 flex size-8 items-center justify-center rounded-lg bg-slate-900 text-white">
+        <Brain className="size-4" />
+      </div>
+      <div className="col-start-2 row-start-1 my-1.5 max-w-[calc(var(--thread-max-width)*0.82)] break-words rounded-lg border border-slate-200 bg-white px-5 py-4 text-sm leading-7 text-slate-800 shadow-sm">
         <MessagePrimitive.Content
           components={{ Text: MarkdownText, tools: { Fallback: ToolFallback } }}
         />
@@ -246,7 +253,7 @@ const AssistantActionBar: FC = () => {
       hideWhenRunning
       autohide="not-last"
       autohideFloat="single-branch"
-      className="text-muted-foreground flex gap-1 col-start-3 row-start-2 -ml-1 data-[floating]:bg-background data-[floating]:absolute data-[floating]:rounded-md data-[floating]:border data-[floating]:p-1 data-[floating]:shadow-sm"
+      className="col-start-3 row-start-2 -ml-1 flex gap-1 text-slate-500 data-[floating]:absolute data-[floating]:rounded-md data-[floating]:border data-[floating]:bg-white data-[floating]:p-1 data-[floating]:shadow-sm"
     >
       <ActionBarPrimitive.Copy asChild>
         <TooltipIconButton tooltip="Copy">
@@ -275,7 +282,7 @@ const BranchPicker: FC<BranchPickerPrimitive.Root.Props> = ({
     <BranchPickerPrimitive.Root
       hideWhenSingleBranch
       className={cn(
-        "text-muted-foreground inline-flex items-center text-xs",
+        "inline-flex items-center text-xs text-slate-500",
         className
       )}
       {...rest}

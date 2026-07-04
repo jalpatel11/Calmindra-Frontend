@@ -1,51 +1,67 @@
-import { NextResponse } from "next/server";
+import {
+  backendHeaders,
+  getBackendUrl,
+  getAuthenticatedProxySession,
+  normalizeSafeId,
+  safeJsonResponse,
+  safeTextResponse,
+  safeTitle,
+  sameOriginGuard,
+} from "@/lib/server/proxy";
 
-const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8000";
+export async function GET() {
+  const session = await getAuthenticatedProxySession();
+  if (!session) {
+    return safeTextResponse("Unauthorized", { status: 401 });
+  }
 
-export async function GET(req: Request) {
   try {
-    const userId = req.headers.get("x-user-id") || "default_user";
-    const res = await fetch(`${BACKEND_URL}/threads/`, {
-      headers: {
-        "x-user-id": userId,
-      },
+    const res = await fetch(getBackendUrl("/threads/"), {
+      headers: backendHeaders(session),
       cache: "no-store",
     });
-    
+
     if (!res.ok) {
-      return new Response(await res.text(), { status: res.status });
+      return safeTextResponse("Unable to load threads", { status: 502 }, session);
     }
-    
+
     const data = await res.json();
-    return NextResponse.json(data);
+    return safeJsonResponse(Array.isArray(data) ? data : [], {}, session);
   } catch (error) {
-    console.error("GET /api/threads error:", error);
-    return new Response("Internal Server Error", { status: 500 });
+    console.error("GET /api/threads failed:", error);
+    return safeTextResponse("Unable to load threads", { status: 502 }, session);
   }
 }
 
 export async function POST(req: Request) {
+  const originError = sameOriginGuard(req);
+  if (originError) return originError;
+
+  const session = await getAuthenticatedProxySession();
+  if (!session) {
+    return safeTextResponse("Unauthorized", { status: 401 });
+  }
+
   try {
-    const userId = req.headers.get("x-user-id") || "default_user";
     const body = await req.json();
-    
-    const res = await fetch(`${BACKEND_URL}/threads/`, {
+    const id = normalizeSafeId(body?.id) || crypto.randomUUID();
+    const title = safeTitle(body?.title);
+
+    const res = await fetch(getBackendUrl("/threads/"), {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-user-id": userId,
-      },
-      body: JSON.stringify(body),
+      headers: backendHeaders(session, true),
+      body: JSON.stringify({ id, title }),
+      cache: "no-store",
     });
-    
+
     if (!res.ok) {
-      return new Response(await res.text(), { status: res.status });
+      return safeTextResponse("Unable to create thread", { status: 502 }, session);
     }
-    
+
     const data = await res.json();
-    return NextResponse.json(data);
+    return safeJsonResponse(data, {}, session);
   } catch (error) {
-    console.error("POST /api/threads error:", error);
-    return new Response("Internal Server Error", { status: 500 });
+    console.error("POST /api/threads failed:", error);
+    return safeTextResponse("Unable to create thread", { status: 502 }, session);
   }
 }

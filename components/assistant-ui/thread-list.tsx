@@ -20,8 +20,8 @@ export const ThreadList: FC = () => {
 const ThreadListNew: FC = () => {
   return (
     <ThreadListPrimitive.New asChild>
-      <Button className="data-[active]:bg-muted hover:bg-muted flex items-center justify-start gap-1 rounded-lg px-2.5 py-2 text-start" variant="ghost">
-        <PlusIcon />
+      <Button className="mx-3 flex items-center justify-start gap-2 rounded-lg bg-emerald-700 px-3 py-2 text-start text-white hover:bg-emerald-800 data-[active]:bg-emerald-800" variant="ghost">
+        <PlusIcon className="size-4" />
         New Thread
       </Button>
     </ThreadListPrimitive.New>
@@ -34,8 +34,8 @@ const ThreadListItems: FC = () => {
 
 const ThreadListItem: FC = () => {
   return (
-    <ThreadListItemPrimitive.Root className="data-[active]:bg-muted hover:bg-muted focus-visible:bg-muted focus-visible:ring-ring flex items-center gap-2 rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2">
-      <ThreadListItemPrimitive.Trigger className="flex-grow px-3 py-2 text-start">
+    <ThreadListItemPrimitive.Root className="mx-3 flex items-center gap-2 rounded-lg transition-all hover:bg-emerald-50 data-[active]:bg-emerald-50 focus-visible:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700/30">
+      <ThreadListItemPrimitive.Trigger className="min-w-0 flex-grow px-3 py-2 text-start">
         <ThreadListItemTitle />
       </ThreadListItemPrimitive.Trigger>
       <ThreadListItemArchive />
@@ -45,7 +45,7 @@ const ThreadListItem: FC = () => {
 
 const ThreadListItemTitle: FC = () => {
   return (
-    <p className="text-sm">
+    <p className="truncate text-sm text-slate-700">
       <ThreadListItemPrimitive.Title fallback="New Chat" />
     </p>
   );
@@ -55,7 +55,7 @@ const ThreadListItemArchive: FC = () => {
   return (
     <ThreadListItemPrimitive.Archive asChild>
       <TooltipIconButton
-        className="hover:text-primary text-foreground ml-auto mr-3 size-4 p-0"
+        className="ml-auto mr-3 size-4 p-0 text-slate-400 hover:text-rose-700"
         variant="ghost"
         tooltip="Archive thread"
       >

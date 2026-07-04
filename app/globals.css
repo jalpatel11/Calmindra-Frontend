@@ -174,5 +174,11 @@
   }
   body {
     @apply bg-background text-foreground;
+    min-height: 100vh;
+    background: #f7faf8;
   }
+}
+
+::selection {
+  background: rgba(15, 118, 110, 0.18);
 }

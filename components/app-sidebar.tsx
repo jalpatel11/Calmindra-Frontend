@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Github, Heart, Brain, Shield, Sparkles } from "lucide-react"
+import { Github, Brain, HeartPulse, ShieldAlert } from "lucide-react"
 import Link from "next/link"
 import {
   Sidebar,
@@ -15,20 +15,20 @@ import { ThreadList } from "./assistant-ui/thread-list"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
-    <Sidebar {...props}>
+    <Sidebar {...props} className="border-emerald-950/10">
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
                 <Link href="#" className="cursor-default">
-                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 text-white">
+                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-emerald-700 text-white">
                     <Brain className="size-4" />
                   </div>
                   <div className="flex flex-col gap-0.5 leading-none">
-                    <span className="font-bold text-lg bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    <span className="text-lg font-bold text-slate-950">
                       Calmindra
                     </span>
-                    <span className="text-xs text-muted-foreground">Mental Health Companion</span>
+                    <span className="text-xs text-slate-500">Mental health companion</span>
                   </div>
                 </Link>
               </SidebarMenuButton>
@@ -37,26 +37,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <div className="px-3 py-2">
-          <div className="mb-4 p-3 rounded-lg bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-100">
+          <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3">
             <div className="flex items-center gap-2 mb-2">
-              <Heart className="h-4 w-4 text-purple-600" />
-              <span className="text-sm font-medium text-gray-700">Your Wellbeing Matters</span>
+              <ShieldAlert className="h-4 w-4 text-amber-700" />
+              <span className="text-sm font-medium text-amber-950">Urgent support</span>
             </div>
-            <p className="text-xs text-gray-600">
-              Remember: I&apos;m here to listen and support, but I&apos;m not a replacement for professional mental health care.
+            <p className="text-xs leading-5 text-amber-900">
+              If you may hurt yourself or someone else, call emergency services or a local crisis line now.
             </p>
           </div>
           
-          <div className="space-y-2 mb-4">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <div className="hidden" /> {/* avoid empty tag check */}
-              <Shield className="h-3 w-3" />
-              <span>Safe & Confidential</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Sparkles className="h-3 w-3" />
-              <span>AI-Powered Support</span>
-            </div>
+          <div className="mb-3 flex items-center gap-2 px-1 text-xs font-semibold uppercase text-slate-500">
+            <HeartPulse className="h-3.5 w-3.5" />
+            Conversations
           </div>
         </div>
         
@@ -69,12 +62,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <Link href="https://github.com/jalpatel11/calmindra" target="_blank">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-slate-900 text-white">
                   <Github className="size-4" />
                 </div>
                 <div className="flex flex-col gap-0.5 leading-none">
-                  <span className="font-semibold">Calmindra</span>
-                  <span className="text-xs">Open Source</span>
+                  <span className="font-semibold text-slate-900">Calmindra</span>
+                  <span className="text-xs text-slate-500">Open source</span>
                 </div>
               </Link>
             </SidebarMenuButton>

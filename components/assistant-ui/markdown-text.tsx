@@ -66,16 +66,16 @@ const useCopyToClipboard = ({
 
 const defaultComponents = memoizeMarkdownComponents({
   h1: ({ className, ...props }) => (
-    <h1 className={cn("mb-8 scroll-m-20 text-4xl font-extrabold tracking-tight last:mb-0", className)} {...props} />
+    <h1 className={cn("mb-8 scroll-m-20 text-3xl font-extrabold last:mb-0", className)} {...props} />
   ),
   h2: ({ className, ...props }) => (
-    <h2 className={cn("mb-4 mt-8 scroll-m-20 text-3xl font-semibold tracking-tight first:mt-0 last:mb-0", className)} {...props} />
+    <h2 className={cn("mb-4 mt-8 scroll-m-20 text-2xl font-semibold first:mt-0 last:mb-0", className)} {...props} />
   ),
   h3: ({ className, ...props }) => (
-    <h3 className={cn("mb-4 mt-6 scroll-m-20 text-2xl font-semibold tracking-tight first:mt-0 last:mb-0", className)} {...props} />
+    <h3 className={cn("mb-4 mt-6 scroll-m-20 text-xl font-semibold first:mt-0 last:mb-0", className)} {...props} />
   ),
   h4: ({ className, ...props }) => (
-    <h4 className={cn("mb-4 mt-6 scroll-m-20 text-xl font-semibold tracking-tight first:mt-0 last:mb-0", className)} {...props} />
+    <h4 className={cn("mb-4 mt-6 scroll-m-20 text-lg font-semibold first:mt-0 last:mb-0", className)} {...props} />
   ),
   h5: ({ className, ...props }) => (
     <h5 className={cn("my-4 text-lg font-semibold first:mt-0 last:mb-0", className)} {...props} />
