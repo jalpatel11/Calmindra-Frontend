@@ -70,7 +70,15 @@ export const myThreadListAdapter: RemoteThreadListAdapter = {
   },
   
   async archive(remoteId: string) {
-    console.log(`Archiving thread ${remoteId}`);
+    try {
+      const res = await fetch(`/api/threads/${remoteId}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("Failed to delete thread during archive");
+    } catch (error) {
+      console.error(`Error archiving remote thread ${remoteId}:`, error);
+      throw error;
+    }
   },
   
   async unarchive(remoteId: string) {

@@ -1,6 +1,8 @@
 export const runtime = "edge";
 export const maxDuration = 30;
 
+import { createDataStreamResponse } from "ai";
+
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8000";
 
 export async function POST(req: Request) {
@@ -55,47 +57,33 @@ export async function POST(req: Request) {
       const data = await backendResponse.json();
       const botMessage = data.bot_message || "";
 
-      // Stream response word by word for AI SDK compatibility
-      const encoder = new TextEncoder();
-      const stream = new ReadableStream({
-        async start(controller) {
+      // Stream response word by word using Vercel AI SDK's official createDataStreamResponse
+      return createDataStreamResponse({
+        execute: async (dataStream) => {
           try {
             const words = botMessage.split(' ');
             for (let i = 0; i < words.length; i++) {
               const word = i === 0 ? words[i] : ' ' + words[i];
-              const chunk = `0:${JSON.stringify(word)}\n`;
-              console.log("Streaming chunk:", chunk.trim());
-              controller.enqueue(encoder.encode(chunk));
+              dataStream.write(`0:${JSON.stringify(word)}\n`);
               // Small delay to simulate typing/streaming effect
               await new Promise((resolve) => setTimeout(resolve, 30));
             }
             
-            const finishChunk = `e:${JSON.stringify({
+            dataStream.write(`e:${JSON.stringify({
               finishReason: "stop",
               usage: {
                 promptTokens: messageText.split(' ').length,
                 completionTokens: words.length
               }
-            })}\n`;
-            console.log("Streaming finish chunk:", finishChunk.trim());
-            controller.enqueue(encoder.encode(finishChunk));
-            
-            controller.close();
+            })}\n`);
           } catch (error) {
             console.error("Streaming error:", error);
-            controller.error(error);
+            throw error;
           }
         },
-      });
-
-      return new Response(stream, {
         headers: {
-          "Content-Type": "text/event-stream; charset=utf-8",
-          "Cache-Control": "no-cache, no-transform",
-          "Connection": "keep-alive",
           "X-Session-ID": sessionId,
-          "x-vercel-ai-data-stream": "v1",
-        },
+        }
       });
 
     } catch (error) {
@@ -103,45 +91,30 @@ export async function POST(req: Request) {
       
       const fallbackText = "I apologize, but I'm having trouble connecting right now. Please try again.";
       
-      const encoder = new TextEncoder();
-      const stream = new ReadableStream({
-        async start(controller) {
+      // Stream fallback response word by word using Vercel AI SDK's official createDataStreamResponse
+      return createDataStreamResponse({
+        execute: async (dataStream) => {
           try {
             const words = fallbackText.split(' ');
             for (let i = 0; i < words.length; i++) {
               const word = i === 0 ? words[i] : ' ' + words[i];
-              const chunk = `0:${JSON.stringify(word)}\n`;
-              console.log("Streaming fallback chunk:", chunk.trim());
-              controller.enqueue(encoder.encode(chunk));
+              dataStream.write(`0:${JSON.stringify(word)}\n`);
               // Small delay to simulate typing/streaming effect
               await new Promise((resolve) => setTimeout(resolve, 30));
             }
             
-            const finishChunk = `e:${JSON.stringify({
+            dataStream.write(`e:${JSON.stringify({
               finishReason: "stop",
               usage: {
                 promptTokens: messageText.split(' ').length,
                 completionTokens: words.length
               }
-            })}\n`;
-            console.log("Streaming fallback finish chunk:", finishChunk.trim());
-            controller.enqueue(encoder.encode(finishChunk));
-            
-            controller.close();
+            })}\n`);
           } catch (error) {
             console.error("Fallback streaming error:", error);
-            controller.error(error);
+            throw error;
           }
-        },
-      });
-
-      return new Response(stream, {
-        headers: {
-          "Content-Type": "text/event-stream; charset=utf-8",
-          "Cache-Control": "no-cache, no-transform",
-          "Connection": "keep-alive",
-          "x-vercel-ai-data-stream": "v1",
-        },
+        }
       });
     }
 
