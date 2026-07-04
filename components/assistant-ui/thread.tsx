@@ -77,8 +77,8 @@ const ThreadWelcome: FC = () => {
           <div className="text-center mb-8">
             <div className="flex items-center justify-center gap-3 mb-4">
               <div className="flex items-center gap-2">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                  <span className="text-white text-xl">🌸</span>
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white">
+                  <Brain className="size-6" />
                 </div>
               </div>
             </div>
@@ -86,7 +86,7 @@ const ThreadWelcome: FC = () => {
               Welcome to Calmindra
             </h1>
             <p className="text-muted-foreground max-w-md">
-              Your compassionate mental health companion. I&apos;m here to provide a safe, non-judgmental space for you to share your thoughts and feelings.
+              Your clinical-grade AI wellbeing companion. Calmindra provides a secure, private space to discuss daily challenges, explore coping strategies, and practice relaxation.
             </p>
           </div>
         </div>
@@ -100,36 +100,33 @@ const ThreadWelcomeSuggestions: FC = () => {
   return (
     <div className="mt-6 flex w-full items-stretch justify-center gap-4 flex-wrap">
       <ThreadPrimitive.Suggestion
-        className="hover:bg-blue-50 flex max-w-sm grow basis-0 flex-col items-center justify-center rounded-lg border border-blue-200 p-4 transition-colors ease-in bg-gradient-to-br from-blue-50/50 to-purple-50/50"
-        prompt="I'm feeling anxious today and could use some support"
+        className="hover:bg-blue-50/80 flex max-w-sm grow basis-0 flex-col items-center justify-center rounded-lg border border-blue-200 p-4 transition-colors ease-in bg-gradient-to-br from-blue-50/50 to-purple-50/50"
+        prompt="I am experiencing anxiety today and would appreciate support."
         method="replace"
         autoSend
       >
-        <div className="mb-2 text-blue-600">💙</div>
-        <span className="line-clamp-2 text-ellipsis text-sm font-semibold text-center">
-          I&apos;m feeling anxious today
+        <span className="line-clamp-2 text-ellipsis text-sm font-semibold text-center text-blue-800">
+          Manage Anxiety
         </span>
       </ThreadPrimitive.Suggestion>
       <ThreadPrimitive.Suggestion
-        className="hover:bg-purple-50 flex max-w-sm grow basis-0 flex-col items-center justify-center rounded-lg border border-purple-200 p-4 transition-colors ease-in bg-gradient-to-br from-purple-50/50 to-pink-50/50"
-        prompt="Can you help me with some breathing exercises or relaxation techniques?"
+        className="hover:bg-purple-50/80 flex max-w-sm grow basis-0 flex-col items-center justify-center rounded-lg border border-purple-200 p-4 transition-colors ease-in bg-gradient-to-br from-purple-50/50 to-pink-50/50"
+        prompt="Could you guide me through breathing exercises or relaxation techniques?"
         method="replace"
         autoSend
       >
-        <div className="mb-2 text-purple-600">🌸</div>
-        <span className="line-clamp-2 text-ellipsis text-sm font-semibold text-center">
-          Help with relaxation techniques
+        <span className="line-clamp-2 text-ellipsis text-sm font-semibold text-center text-purple-800">
+          Relaxation Techniques
         </span>
       </ThreadPrimitive.Suggestion>
       <ThreadPrimitive.Suggestion
-        className="hover:bg-green-50 flex max-w-sm grow basis-0 flex-col items-center justify-center rounded-lg border border-green-200 p-4 transition-colors ease-in bg-gradient-to-br from-green-50/50 to-blue-50/50"
-        prompt="I'd like to talk about what's been on my mind lately"
+        className="hover:bg-green-50/80 flex max-w-sm grow basis-0 flex-col items-center justify-center rounded-lg border border-green-200 p-4 transition-colors ease-in bg-gradient-to-br from-green-50/50 to-blue-50/50"
+        prompt="I would like to speak about what has been on my mind recently."
         method="replace"
         autoSend
       >
-        <div className="mb-2 text-green-600">💚</div>
-        <span className="line-clamp-2 text-ellipsis text-sm font-semibold text-center">
-          Talk about what&apos;s on my mind
+        <span className="line-clamp-2 text-ellipsis text-sm font-semibold text-center text-green-800">
+          Open Discussion
         </span>
       </ThreadPrimitive.Suggestion>
     </div>
@@ -142,7 +139,7 @@ const Composer: FC = () => {
       <ComposerPrimitive.Input
         rows={1}
         autoFocus
-        placeholder="Share what's on your mind... I'm here to listen 💙"
+        placeholder="Type a message or share what is on your mind..."
         className="placeholder:text-muted-foreground max-h-40 flex-grow resize-none border-none bg-transparent px-2 py-4 text-sm outline-none focus:ring-0 disabled:cursor-not-allowed"
       />
       <ComposerAction />

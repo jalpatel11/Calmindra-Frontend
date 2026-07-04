@@ -33,19 +33,6 @@ export const Assistant = () => {
         adapters: {
           history: makeHistoryAdapter(threadId),
         },
-        messages: [
-          {
-            id: "welcome-msg",
-            role: "assistant",
-            parts: [
-              {
-                type: "text",
-                text: "Hello! I'm **Calmindra**, your compassionate mental health companion. 🌸\n\nI'm here to provide a safe, non-judgmental space where you can:\n\n- 💙 Share your thoughts and feelings\n- 🌿 Explore coping strategies  \n- 💜 Find emotional support\n- 🧘‍♀️ Practice mindfulness techniques\n- 🌟 Work through daily challenges\n\nTake a deep breath, and know that whatever you're going through, you don't have to face it alone. \n\n**How are you feeling today?** Feel free to share as much or as little as you'd like - I'm here to listen. 💕",
-                state: "done"
-              }
-            ],
-          },
-        ],
       });
     },
   });

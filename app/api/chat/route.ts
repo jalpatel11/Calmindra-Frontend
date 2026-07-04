@@ -90,7 +90,9 @@ export async function POST(req: Request) {
 
       return new Response(stream, {
         headers: {
-          "Content-Type": "text/plain; charset=utf-8",
+          "Content-Type": "text/event-stream; charset=utf-8",
+          "Cache-Control": "no-cache, no-transform",
+          "Connection": "keep-alive",
           "X-Session-ID": sessionId,
           "x-vercel-ai-data-stream": "v1",
         },
@@ -135,7 +137,9 @@ export async function POST(req: Request) {
 
       return new Response(stream, {
         headers: {
-          "Content-Type": "text/plain; charset=utf-8",
+          "Content-Type": "text/event-stream; charset=utf-8",
+          "Cache-Control": "no-cache, no-transform",
+          "Connection": "keep-alive",
           "x-vercel-ai-data-stream": "v1",
         },
       });
