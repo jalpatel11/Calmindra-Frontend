@@ -3,24 +3,20 @@ import {
   ensureBackendUser,
   getAuthenticatedProxySession,
 } from "@/lib/server/proxy";
-import { redirect } from "next/navigation";
 import { Assistant } from "./assistant";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
   const session = await auth();
+  const isLoggedIn = Boolean(session?.user);
 
-  if (!session?.user) {
-    redirect("/sign-in");
+  if (isLoggedIn) {
+    const proxySession = await getAuthenticatedProxySession();
+    if (proxySession) {
+      await ensureBackendUser(proxySession);
+    }
   }
 
-  const proxySession = await getAuthenticatedProxySession();
-  if (!proxySession) {
-    redirect("/sign-in");
-  }
-
-  await ensureBackendUser(proxySession);
-
-  return <Assistant />;
+  return <Assistant isLoggedIn={isLoggedIn} />;
 }

@@ -14,8 +14,14 @@ import { Brain, Sparkles } from "lucide-react";
 import { myThreadListAdapter, makeHistoryAdapter } from "@/hooks/use-thread-manager";
 import { UserMenu } from "@/components/auth/user-menu";
 
-export const Assistant = () => {
-  const runtime = useRemoteThreadListRuntime({
+export const Assistant = ({ isLoggedIn = false }: { isLoggedIn?: boolean }) => {
+  const chatRuntime = useChatRuntime({
+    transport: new AssistantChatTransport({
+      api: "/api/chat",
+    }),
+  });
+
+  const remoteRuntime = useRemoteThreadListRuntime({
     adapter: myThreadListAdapter,
     runtimeHook: () => {
       // Fetch the thread ID for the currently mounted thread from the assistant-ui context
@@ -37,10 +43,12 @@ export const Assistant = () => {
     },
   });
 
+  const runtime = isLoggedIn ? remoteRuntime : chatRuntime;
+
   return (
     <AssistantRuntimeProvider runtime={runtime}>
       <SidebarProvider>
-        <AppSidebar />
+        <AppSidebar isLoggedIn={isLoggedIn} />
         <SidebarInset>
           <header className="flex h-16 shrink-0 items-center gap-3 border-b border-emerald-950/10 bg-white/90 px-4 backdrop-blur">
             <SidebarTrigger className="text-slate-700" />
@@ -60,7 +68,7 @@ export const Assistant = () => {
             </div>
             <UserMenu />
           </header>
-          <Thread />
+          <Thread isLoggedIn={isLoggedIn} />
         </SidebarInset>
       </SidebarProvider>
     </AssistantRuntimeProvider>

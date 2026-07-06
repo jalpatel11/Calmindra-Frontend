@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/sidebar"
 import { ThreadList } from "./assistant-ui/thread-list"
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({ isLoggedIn = false, ...props }: React.ComponentProps<typeof Sidebar> & { isLoggedIn?: boolean }) {
   return (
     <Sidebar {...props} className="border-emerald-950/10">
       <SidebarHeader>
@@ -53,7 +53,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </div>
         </div>
         
-        <ThreadList />
+        {isLoggedIn ? (
+          <ThreadList />
+        ) : (
+          <div className="px-4 py-3 text-center">
+            <p className="text-xs text-slate-505 leading-normal text-slate-500">
+              Sign in to save your conversations and view history.
+            </p>
+            <Link href="/sign-in" className="mt-3 block">
+              <span className="inline-flex items-center justify-center w-full rounded-md bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-800 hover:bg-emerald-100 transition-colors cursor-pointer">
+                Sign In
+              </span>
+            </Link>
+          </div>
+        )}
       </SidebarContent>
       
       <SidebarRail />

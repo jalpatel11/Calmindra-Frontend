@@ -10,8 +10,33 @@ import {
   normalizeSafeId,
   sameOriginGuard,
   safeTextResponse,
+  safeJsonResponse,
   withApiHeaders,
 } from "@/lib/server/proxy";
+
+function parseCookies(cookieHeader: string | null): Record<string, string> {
+  if (!cookieHeader) return {};
+  const cookies: Record<string, string> = {};
+  cookieHeader.split(";").forEach((cookie) => {
+    const parts = cookie.split("=");
+    const key = parts[0].trim();
+    const value = parts.slice(1).join("=").trim();
+    cookies[key] = value;
+  });
+  return cookies;
+}
+
+function injectGuestCookies(response: Response, guestUserId: string, count: number) {
+  response.headers.append(
+    "Set-Cookie",
+    `guest_user_id=${guestUserId}; Path=/; Max-Age=31536000; SameSite=Lax; HttpOnly`
+  );
+  response.headers.append(
+    "Set-Cookie",
+    `guest_prompt_count=${count}; Path=/; Max-Age=31536000; SameSite=Lax; HttpOnly`
+  );
+  return response;
+}
 
 type IncomingMessagePart = {
   type?: string;
@@ -47,9 +72,33 @@ export async function POST(req: Request) {
   const originError = sameOriginGuard(req);
   if (originError) return originError;
 
-  const session = await getAuthenticatedProxySession();
+  let session = await getAuthenticatedProxySession();
+  let guestPromptCount = 0;
+  let isAnonymous = false;
+
   if (!session) {
-    return safeTextResponse("Unauthorized", { status: 401 });
+    isAnonymous = true;
+    const cookieHeader = req.headers.get("cookie");
+    const cookies = parseCookies(cookieHeader);
+
+    let guestUserId = cookies["guest_user_id"];
+    if (!guestUserId || !/^usr_[a-f0-9]{32}$/i.test(guestUserId)) {
+      guestUserId = `usr_${crypto.randomUUID().replace(/-/g, "")}`;
+    }
+
+    guestPromptCount = parseInt(cookies["guest_prompt_count"] || "0", 10);
+    if (guestPromptCount >= 5) {
+      return safeJsonResponse(
+        {
+          error: "limit_reached",
+          message: "You have reached the limit of 5 free prompts. Please sign in or sign up to continue.",
+        },
+        { status: 403 },
+      );
+    }
+
+    guestPromptCount += 1;
+    session = { userId: guestUserId };
   }
 
   try {
@@ -89,30 +138,35 @@ export async function POST(req: Request) {
     });
 
     if (backendResponse.ok && backendResponse.body) {
-      return streamBackendText(backendResponse.body, session, {
+      const response = streamBackendText(backendResponse.body, session, {
         headers: { "X-Session-ID": sessionId },
       });
+      return isAnonymous ? injectGuestCookies(response, session.userId, guestPromptCount) : response;
     }
 
     if (backendResponse.status === 404 || backendResponse.status === 405) {
-      return proxyLegacyChatRequest(backendPayload, backendHeadersWithSession, session, sessionId);
+      const response = await proxyLegacyChatRequest(backendPayload, backendHeadersWithSession, session, sessionId);
+      return isAnonymous ? injectGuestCookies(response, session.userId, guestPromptCount) : response;
     }
 
     if (!backendResponse.ok) {
-      return streamBackendError(backendResponse.status, session);
+      const response = streamBackendError(backendResponse.status, session);
+      return isAnonymous ? injectGuestCookies(response, session.userId, guestPromptCount) : response;
     }
 
-    return streamAssistantText(
+    const response = streamAssistantText(
       "I could not read Calmindra's response just now. Please try again in a moment.",
       session,
       { headers: { "X-Session-ID": sessionId } },
     );
+    return isAnonymous ? injectGuestCookies(response, session.userId, guestPromptCount) : response;
   } catch (error) {
     console.error("POST /api/chat failed:", error);
-    return streamAssistantText(
+    const response = streamAssistantText(
       "I could not reach Calmindra just now. Please try again in a moment.",
       session,
     );
+    return isAnonymous ? injectGuestCookies(response, session.userId, guestPromptCount) : response;
   }
 }
 

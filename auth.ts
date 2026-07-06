@@ -87,11 +87,16 @@ const authConfig: NextAuthConfig = {
       const isAuthenticated = Boolean(auth?.user);
 
       if (
+        pathname === "/" ||
         pathname === "/sign-in" ||
         pathname.startsWith("/api/auth") ||
         pathname.startsWith("/_next") ||
         pathname === "/favicon.ico"
       ) {
+        return true;
+      }
+
+      if (pathname === "/api/chat") {
         return true;
       }
 

@@ -26,8 +26,27 @@ import { Button } from "@/components/ui/button";
 import { MarkdownText } from "@/components/assistant-ui/markdown-text";
 import { TooltipIconButton } from "@/components/assistant-ui/tooltip-icon-button";
 import { ToolFallback } from "./tool-fallback";
+import { Lock } from "lucide-react";
+import Link from "next/link";
+import { useState, useEffect } from "react";
 
-export const Thread: FC = () => {
+export const Thread: FC<{ isLoggedIn?: boolean }> = ({ isLoggedIn = false }) => {
+  const [promptCount, setPromptCount] = useState(0);
+
+  useEffect(() => {
+    const updateCount = () => {
+      const match = document.cookie.match(new RegExp('(^| )guest_prompt_count=([^;]*)'));
+      if (match) {
+        setPromptCount(parseInt(match[2], 10));
+      }
+    };
+    updateCount();
+    const interval = setInterval(updateCount, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const limitReached = !isLoggedIn && promptCount >= 5;
+
   return (
     <ThreadPrimitive.Root
       className="box-border flex h-full flex-col overflow-hidden bg-[#f7faf8]"
@@ -50,12 +69,40 @@ export const Thread: FC = () => {
           <div className="min-h-8 flex-grow" />
         </ThreadPrimitive.If>
 
-        <div className="sticky bottom-0 mt-3 flex w-full max-w-[var(--thread-max-width)] flex-col items-center justify-end bg-gradient-to-t from-[#f7faf8] via-[#f7faf8] to-transparent pb-4 pt-6">
+        <div className="sticky bottom-0 mt-3 flex w-full flex-col items-center justify-end bg-gradient-to-t from-[#f7faf8] via-[#f7faf8] to-transparent pb-4 pt-6">
           <ThreadScrollToBottom />
-          <Composer />
+          {limitReached ? <AuthRequiredBanner /> : <Composer />}
         </div>
       </ThreadPrimitive.Viewport>
     </ThreadPrimitive.Root>
+  );
+};
+
+const AuthRequiredBanner: FC = () => {
+  return (
+    <div className="flex w-full flex-col items-center justify-center gap-4 rounded-2xl border border-emerald-950/15 bg-white p-6 shadow-md max-w-[var(--thread-max-width)] text-center">
+      <div className="flex size-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-800 animate-bounce">
+        <Lock className="size-6" />
+      </div>
+      <div>
+        <h3 className="text-lg font-semibold text-slate-950">You&apos;ve reached your free limit</h3>
+        <p className="mt-1.5 text-sm text-slate-500 max-w-sm">
+          Create a private Calmindra space or sign in to save your conversation history and continue.
+        </p>
+      </div>
+      <div className="flex gap-3 w-full max-w-xs mt-1">
+        <Link href="/sign-in" className="flex-1">
+          <Button variant="outline" className="w-full border-slate-200 text-slate-700 hover:bg-slate-50">
+            Sign in
+          </Button>
+        </Link>
+        <Link href="/sign-in?mode=signup" className="flex-1">
+          <Button className="w-full bg-emerald-700 hover:bg-emerald-800 text-white shadow-sm">
+            Sign up
+          </Button>
+        </Link>
+      </div>
+    </div>
   );
 };
 

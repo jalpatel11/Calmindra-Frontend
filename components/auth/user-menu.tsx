@@ -13,6 +13,16 @@ export function UserMenu() {
     );
   }
 
+  if (!session?.user) {
+    return (
+      <a href="/sign-in">
+        <Button className="bg-emerald-700 hover:bg-emerald-800 text-white text-xs h-9 px-4 rounded-full font-medium">
+          Sign in
+        </Button>
+      </a>
+    );
+  }
+
   const label = session?.user?.name || session?.user?.email || "Signed in";
 
   return (
