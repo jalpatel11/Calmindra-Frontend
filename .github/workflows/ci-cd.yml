@@ -64,5 +64,5 @@ jobs:
             --region us-central1 \
             --platform managed \
             --allow-unauthenticated \
-            --set-env-vars="BACKEND_URL=https://calmindra-backend-707200295934.us-central1.run.app" \
+            --set-env-vars="BACKEND_URL=https://calmindra-backend-707200295934.us-central1.run.app,AUTH_TRUST_HOST=true,AUTH_URL=https://calmindra.jalpatel.dev" \
             --set-secrets="BACKEND_API_SECRET=backend-api-secret:latest,AUTH_SECRET=auth-secret:latest"

@@ -92,7 +92,7 @@ gcloud run deploy calmindra-frontend \
   --cpu=1 \
   --max-instances=3 \
   --min-instances=0 \
-  --set-env-vars="BACKEND_URL=$BACKEND_URL" \
+  --set-env-vars="BACKEND_URL=$BACKEND_URL,AUTH_TRUST_HOST=${AUTH_TRUST_HOST:-true},AUTH_URL=${AUTH_URL:-https://calmindra.jalpatel.dev}" \
   --set-secrets="BACKEND_API_SECRET=backend-api-secret:latest,AUTH_SECRET=auth-secret:latest"
 
 echo ""
