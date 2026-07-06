@@ -42,7 +42,14 @@ export function sameOriginGuard(req: Request) {
   const origin = req.headers.get("origin");
   if (!origin) return null;
 
-  const expectedOrigin = new URL(req.url).origin;
+  const forwardedHost = req.headers.get("x-forwarded-host");
+  const forwardedProto = req.headers.get("x-forwarded-proto") || "https";
+  
+  let expectedOrigin = new URL(req.url).origin;
+  if (forwardedHost) {
+    expectedOrigin = `${forwardedProto}://${forwardedHost}`;
+  }
+
   if (origin === expectedOrigin) return null;
 
   return safeTextResponse("Forbidden", { status: 403 });
